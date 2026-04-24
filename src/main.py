@@ -79,6 +79,48 @@ def _pick_input_video(explicit: Path | None) -> Path:
     return config.IN_DIR / choice
 
 
+def _pick_resolution(explicit: str | None) -> str:
+    if explicit:
+        return explicit
+    hints = {
+        "540p": "3 credits/sec — cheapest, good for drafts",
+        "720p": "6 credits/sec — recommended, matches a16z Show",
+        "1080p": "9.6 credits/sec — premium, for final masters",
+    }
+    choice = questionary.select(
+        "Output resolution?",
+        choices=[
+            questionary.Choice(f"{r}  ({hints[r]})", value=r)
+            for r in config.RESOLUTIONS
+        ],
+        default=f"{config.DEFAULT_RESOLUTION}  ({hints[config.DEFAULT_RESOLUTION]})",
+    ).ask()
+    if choice is None:
+        sys.exit(130)
+    return choice
+
+
+def _pick_aspect(explicit: str | None) -> str:
+    if explicit:
+        return explicit
+    hints = {
+        "16:9": "landscape — most podcasts, widescreen edits",
+        "1:1": "square — social clips, Instagram feed",
+        "9:16": "vertical — Shorts, Reels, TikTok",
+    }
+    choice = questionary.select(
+        "Output aspect ratio?",
+        choices=[
+            questionary.Choice(f"{a}  ({hints[a]})", value=a)
+            for a in config.ASPECT_RATIOS
+        ],
+        default=f"{config.DEFAULT_ASPECT_RATIO}  ({hints[config.DEFAULT_ASPECT_RATIO]})",
+    ).ask()
+    if choice is None:
+        sys.exit(130)
+    return choice
+
+
 def _pick_character(explicit: str | None) -> Path:
     images = sorted(
         p for p in config.CHARACTERS_DIR.iterdir()
@@ -160,6 +202,8 @@ def _print_summary(
     input_video: Path,
     character: Path,
     resolution: str,
+    aspect_ratio: str,
+    prompt: str,
     timeline: list[audio.Interval],
     chunks: list[audio.Chunk],
 ) -> None:
@@ -177,6 +221,8 @@ def _print_summary(
     table.add_row("Input", str(input_video.relative_to(config.PROJECT_ROOT)))
     table.add_row("Character", character.name)
     table.add_row("Resolution", resolution)
+    table.add_row("Aspect", aspect_ratio)
+    table.add_row("Prompt", f'"{prompt}"')
     table.add_row("Duration", f"{_fmt_time(total)}")
     table.add_row("Speech / Silence", f"{speech / total:.0%} / {silence / total:.0%}")
     table.add_row("Speech chunks", f"{len(speech_chunks)} (each ≤ {config.MAX_CHUNK_SECONDS}s)")
@@ -217,7 +263,7 @@ async def _run_pipeline(
     timeline = audio.detect_silence(original_audio)
     chunks = audio.chunk_timeline(timeline, original_audio)
 
-    _print_summary(input_video, character, resolution, timeline, chunks)
+    _print_summary(input_video, character, resolution, aspect_ratio, prompt, timeline, chunks)
 
     if not assume_yes:
         if not await questionary.confirm("Proceed?", default=False).ask_async():
@@ -300,11 +346,12 @@ def main() -> None:
     parser.add_argument("--input", type=Path, help="Input video path (default: pick from in/)")
     parser.add_argument("--character", type=str, help="Character image stem (default: prompt)")
     parser.add_argument(
-        "--resolution", choices=config.RESOLUTIONS, default=config.DEFAULT_RESOLUTION,
+        "--resolution", choices=config.RESOLUTIONS, default=None,
+        help=f"Output resolution. If omitted, you'll be asked. Default via --yes: {config.DEFAULT_RESOLUTION}.",
     )
     parser.add_argument(
-        "--aspect", choices=config.ASPECT_RATIOS, default=config.DEFAULT_ASPECT_RATIO,
-        help="Aspect ratio passed to Hedra.",
+        "--aspect", choices=config.ASPECT_RATIOS, default=None,
+        help=f"Aspect ratio. If omitted, you'll be asked. Default via --yes: {config.DEFAULT_ASPECT_RATIO}.",
     )
     parser.add_argument(
         "--prompt", type=str, default=config.HEDRA_DEFAULT_PROMPT,
@@ -322,13 +369,19 @@ def main() -> None:
 
     input_video = _pick_input_video(args.input)
     character = _pick_character(args.character)
+    if args.yes:
+        resolution = args.resolution or config.DEFAULT_RESOLUTION
+        aspect = args.aspect or config.DEFAULT_ASPECT_RATIO
+    else:
+        resolution = _pick_resolution(args.resolution)
+        aspect = _pick_aspect(args.aspect)
 
     try:
         final_out = asyncio.run(_run_pipeline(
             input_video=input_video,
             character=character,
-            resolution=args.resolution,
-            aspect_ratio=args.aspect,
+            resolution=resolution,
+            aspect_ratio=aspect,
             prompt=args.prompt,
             assume_yes=args.yes,
             concurrency=max(1, args.concurrency),
