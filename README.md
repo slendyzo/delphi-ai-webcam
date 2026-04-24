@@ -54,8 +54,15 @@ cp .env.example .env                # then paste your Hedra key into .env
 
 1. Drop a guest's webcam recording into `in/` (supports `.mp4`, `.mov`, `.mkv`, `.m4v`, `.webm`).
 2. Drop a character portrait into `characters/` (`.png` or `.jpg`). Tips: 1024px+ portrait crop, face clearly visible, simple or transparent background works best.
-3. Run:
+3. Launch the pipeline. Two options:
 
+   **Double-click (easiest):**
+   - Mac: `run.command`
+   - Windows: `run.bat`
+
+   A terminal window opens and walks you through character pick + cost preview + y/N.
+
+   **Or from the command line:**
    ```bash
    uv run delphi
    ```
@@ -64,6 +71,8 @@ cp .env.example .env                # then paste your Hedra key into .env
 5. Review the cost estimate. Type `y` to proceed, or anything else to abort.
 6. Wait. For a 60-min episode expect roughly 15–40 minutes of wall time depending on concurrency and Hedra queue.
 7. Output lands in `out/<input-name>_<character-name>.mp4`.
+
+**Important:** Hedra generations take ~2 minutes per chunk of output. For a short clip you'll see the progress bar sit at `0/1` for a minute or two while the API works — that's normal, not a hang. Don't Ctrl-C early unless you really want to stop.
 
 ### Example
 
