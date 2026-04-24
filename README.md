@@ -8,71 +8,75 @@ Uses [Hedra Character-3](https://www.hedra.com) for the animation. See [docs/PLA
 
 ---
 
-## Prerequisites
+## The 60-second version
 
-You need **ffmpeg** and **uv** installed on your system.
+There are two scripts you'll ever double-click:
 
-**Mac:**
-```bash
-brew install ffmpeg uv
-```
+| File | What it does | When to use |
+|------|--------------|-------------|
+| `install.command` (Mac) / `install.bat` (Windows) | Installs ffmpeg, uv, Python deps; creates `.env` and asks for your Hedra key | Once, when you clone the repo or move to a new machine |
+| `run.command` (Mac) / `run.bat` (Windows) | Runs the animation pipeline | Every time you want to process a video |
 
-**Windows:**
-```powershell
-winget install ffmpeg astral-sh.uv
-```
-
-You also need a **Hedra API key** — sign-up instructions below.
+Typical flow: run the installer once. Then each episode, drop the webcam file in `in/`, drop the character illustration in `characters/`, double-click `run.command`, answer the menus, walk away.
 
 ---
 
 ## First-time setup
 
-```bash
-git clone <repo-url> delphi_ai_webcam
-cd delphi_ai_webcam
-uv sync                             # installs Python + deps into .venv/
-cp .env.example .env                # then paste your Hedra key into .env
-```
+### The one-click way (recommended)
+
+1. Clone the repo and open the folder in Finder (Mac) or Explorer (Windows).
+2. Double-click **`install.command`** (Mac) or **`install.bat`** (Windows).
+3. Follow the prompts. When it asks, paste your Hedra API key (see below for how to get one).
+
+The installer is idempotent — run it again any time to re-sync after pulling updates.
 
 ### Getting a Hedra API key
 
-1. Sign up at [hedra.com](https://www.hedra.com).
-2. Pick a plan from [hedra.com/pricing](https://www.hedra.com/pricing):
-   - **Creator** ($30/mo, ~10 min of 720p generation) — fine for testing.
-   - **Pro** ($75/mo, ~30 min of 720p generation) — baseline, but a single 60-min episode will exceed this; you'll pay overage credits on top.
-   - **Enterprise** (custom pricing) — the right choice if you're running this weekly.
-3. Open the dashboard → **API** / **Developers** section → create a key.
-4. Paste it into `.env`:
-   ```
-   HEDRA_API_KEY=hk_live_xxxxxxxxxxxxxxxxx
-   ```
+1. Sign up at [hedra.com](https://www.hedra.com) and subscribe to at least the **Creator** plan. API access is gated behind a paid plan.
+   - **Creator** (~$24–30/mo, ~10 min of 720p generation) — fine for testing.
+   - **Pro** (~$60–75/mo, ~30 min of 720p) — baseline, but a single 60-min episode exceeds this; overage credits apply.
+   - **Enterprise** (custom) — the right plan for a weekly podcast cadence.
+2. Open [hedra.com/api-profile](https://www.hedra.com/api-profile) and create a key.
+3. When the installer prompts you, paste it. It gets saved to `.env` (gitignored).
+
+### The manual way (for power users)
+
+```bash
+# Mac
+brew install ffmpeg uv
+
+# Windows
+winget install ffmpeg astral-sh.uv
+```
+
+```bash
+uv sync
+cp .env.example .env       # then edit .env and paste your Hedra key
+```
 
 ---
 
 ## Usage
 
 1. Drop a guest's webcam recording into `in/` (supports `.mp4`, `.mov`, `.mkv`, `.m4v`, `.webm`).
-2. Drop a character portrait into `characters/` (`.png` or `.jpg`). Tips: 1024px+ portrait crop, face clearly visible, simple or transparent background works best.
-3. Launch the pipeline. Two options:
+2. Drop a character portrait into `characters/` (`.png` or `.jpg`). Tips: 1024px+ portrait crop, face clearly visible, simple or transparent background works best. **Human face proportions animate best** — muppets and non-human geometry produce weak lip motion.
+3. Double-click **`run.command`** (Mac) or **`run.bat`** (Windows). A terminal opens and asks:
+   - Which character?
+   - Resolution? (540p cheap / 720p recommended / 1080p premium — credit cost shown)
+   - Aspect ratio? (16:9 / 1:1 / 9:16)
+4. Review the job plan with cost estimate. Type `y` to proceed.
+5. Wait. Hedra takes ~2 minutes per chunk of output — a 10-second clip takes about 2 minutes, a 60-minute episode 15–40 minutes depending on concurrency and queue.
+6. Output lands in `out/<input-name>_<character-name>.mp4`.
 
-   **Double-click (easiest):**
-   - Mac: `run.command`
-   - Windows: `run.bat`
+**Important:** Progress sitting at `0/1` for a minute or two is normal — that's the Hedra queue, not a hang. Don't Ctrl-C early unless you really mean it.
 
-   A terminal window opens and walks you through character pick + cost preview + y/N.
+### Command-line version
 
-   **Or from the command line:**
-   ```bash
-   uv run delphi
-   ```
-
-4. Pick your character from the arrow-key menu.
-5. Review the cost estimate. Type `y` to proceed, or anything else to abort.
-6. Wait. For a 60-min episode expect roughly 15–40 minutes of wall time depending on concurrency and Hedra queue.
-7. Output lands in `out/<input-name>_<character-name>.mp4`.
-
-**Important:** Hedra generations take ~2 minutes per chunk of output. For a short clip you'll see the progress bar sit at `0/1` for a minute or two while the API works — that's normal, not a hang. Don't Ctrl-C early unless you really want to stop.
+If you prefer the terminal:
+```bash
+uv run delphi
+```
 
 ### Example
 
