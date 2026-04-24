@@ -87,13 +87,14 @@ def _pick_resolution(explicit: str | None) -> str:
         "720p": "6 credits/sec — recommended, matches a16z Show",
         "1080p": "9.6 credits/sec — premium, for final masters",
     }
+    choices = [
+        questionary.Choice(f"{r}  ({hints[r]})", value=r)
+        for r in config.RESOLUTIONS
+    ]
     choice = questionary.select(
         "Output resolution?",
-        choices=[
-            questionary.Choice(f"{r}  ({hints[r]})", value=r)
-            for r in config.RESOLUTIONS
-        ],
-        default=f"{config.DEFAULT_RESOLUTION}  ({hints[config.DEFAULT_RESOLUTION]})",
+        choices=choices,
+        default=next(c for c in choices if c.value == config.DEFAULT_RESOLUTION),
     ).ask()
     if choice is None:
         sys.exit(130)
@@ -108,13 +109,14 @@ def _pick_aspect(explicit: str | None) -> str:
         "1:1": "square — social clips, Instagram feed",
         "9:16": "vertical — Shorts, Reels, TikTok",
     }
+    choices = [
+        questionary.Choice(f"{a}  ({hints[a]})", value=a)
+        for a in config.ASPECT_RATIOS
+    ]
     choice = questionary.select(
         "Output aspect ratio?",
-        choices=[
-            questionary.Choice(f"{a}  ({hints[a]})", value=a)
-            for a in config.ASPECT_RATIOS
-        ],
-        default=f"{config.DEFAULT_ASPECT_RATIO}  ({hints[config.DEFAULT_ASPECT_RATIO]})",
+        choices=choices,
+        default=next(c for c in choices if c.value == config.DEFAULT_ASPECT_RATIO),
     ).ask()
     if choice is None:
         sys.exit(130)
