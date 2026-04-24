@@ -1,0 +1,32 @@
+# Secrets
+.env
+
+# Virtual environments
+.venv/
+venv/
+.python-version
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+
+# Project I/O
+in/*
+!in/.gitkeep
+out/*
+!out/.gitkeep
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo

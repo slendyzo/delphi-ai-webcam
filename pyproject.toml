@@ -1,0 +1,22 @@
+[project]
+name = "delphi-ai-webcam"
+version = "0.1.0"
+description = "Animate a custom illustration to lip-sync with a webcam recording for anonymous podcast guests"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "questionary>=2.0",
+    "rich>=13.0",
+]
+
+[project.scripts]
+delphi = "src.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
