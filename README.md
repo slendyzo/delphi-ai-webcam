@@ -93,7 +93,7 @@ uv run delphi --concurrency 6
 |------|---------|---------|
 | `--input PATH` | (prompt) | Video file to process; auto-picks if only one in `in/` |
 | `--character NAME` | (prompt) | Character image stem (e.g. `shakespeare` for `characters/shakespeare.png`) |
-| `--resolution 720p\|540p` | `720p` | Output resolution (540p is ~35% cheaper) |
+| `--resolution 540p\|720p\|1080p` | `720p` | Output resolution. 540p costs half of 720p (3 credits/sec vs 6); 1080p costs 1.6× (9.6 credits/sec). |
 | `--aspect 16:9\|9:16\|1:1` | `16:9` | Aspect ratio passed to Hedra |
 | `--prompt TEXT` | `"talking head, natural expression, static body"` | Tone/mood hint for Hedra |
 | `--concurrency N` | `4` | Max concurrent Hedra generations |

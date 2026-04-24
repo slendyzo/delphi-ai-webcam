@@ -23,16 +23,19 @@ HEDRA_API_BASE = "https://api.hedra.com/web-app/public"
 HEDRA_API_KEY = os.environ.get("HEDRA_API_KEY", "").strip()
 HEDRA_MAX_CONCURRENT = int(os.environ.get("HEDRA_MAX_CONCURRENT", "4"))
 HEDRA_POLL_INTERVAL_S = 5
-HEDRA_GENERATION_TIMEOUT_S = 600
-HEDRA_DEFAULT_PROMPT = "talking head, natural expression, static body"
+HEDRA_GENERATION_TIMEOUT_S = 1200
+HEDRA_DEFAULT_PROMPT = "a person talking naturally"
 
-MAX_CHUNK_SECONDS = 60
+# Character-3's real max is 300s per call. We chunk below that with a safety
+# margin and prefer splitting at internal pauses to avoid visible seams.
+MAX_CHUNK_SECONDS = 240
 HARD_CUT_SAFETY_S = 0.5
 
-RESOLUTIONS = ("720p", "540p")
+RESOLUTIONS = ("540p", "720p", "1080p")
 DEFAULT_RESOLUTION = "720p"
 
-CREDITS_PER_SEC = {"720p": 6, "540p": 4}
+# Character-3 pricing: base 6 credits/sec at 720p, modified by resolution.
+CREDITS_PER_SEC = {"540p": 3, "720p": 6, "1080p": 9.6}
 CREDIT_USD_RATE = 0.0068
 
 ASPECT_RATIOS = ("16:9", "9:16", "1:1")
