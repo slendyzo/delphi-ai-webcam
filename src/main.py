@@ -220,7 +220,7 @@ async def _run_pipeline(
     _print_summary(input_video, character, resolution, timeline, chunks)
 
     if not assume_yes:
-        if not questionary.confirm("Proceed?", default=False).ask():
+        if not await questionary.confirm("Proceed?", default=False).ask_async():
             console.print("[yellow]Aborted.[/yellow]")
             sys.exit(0)
 
