@@ -123,6 +123,19 @@ def _pick_aspect(explicit: str | None) -> str:
     return choice
 
 
+def _pick_prompt(explicit: str | None) -> str:
+    if explicit is not None:
+        return explicit
+    answer = questionary.text(
+        "Prompt (tone/mood hint sent to Hedra):",
+        default=config.HEDRA_DEFAULT_PROMPT,
+    ).ask()
+    if answer is None:
+        sys.exit(130)
+    answer = answer.strip()
+    return answer or config.HEDRA_DEFAULT_PROMPT
+
+
 def _pick_character(explicit: str | None) -> Path:
     images = sorted(
         p for p in config.CHARACTERS_DIR.iterdir()
@@ -356,8 +369,8 @@ def main() -> None:
         help=f"Aspect ratio. If omitted, you'll be asked. Default via --yes: {config.DEFAULT_ASPECT_RATIO}.",
     )
     parser.add_argument(
-        "--prompt", type=str, default=config.HEDRA_DEFAULT_PROMPT,
-        help="Text prompt sent to Hedra (tone/mood hint).",
+        "--prompt", type=str, default=None,
+        help=f"Text prompt sent to Hedra (tone/mood hint). If omitted, you'll be asked. Default via --yes: \"{config.HEDRA_DEFAULT_PROMPT}\".",
     )
     parser.add_argument(
         "--concurrency", type=int, default=config.HEDRA_MAX_CONCURRENT,
@@ -374,9 +387,11 @@ def main() -> None:
     if args.yes:
         resolution = args.resolution or config.DEFAULT_RESOLUTION
         aspect = args.aspect or config.DEFAULT_ASPECT_RATIO
+        prompt = args.prompt if args.prompt is not None else config.HEDRA_DEFAULT_PROMPT
     else:
         resolution = _pick_resolution(args.resolution)
         aspect = _pick_aspect(args.aspect)
+        prompt = _pick_prompt(args.prompt)
 
     try:
         final_out = asyncio.run(_run_pipeline(
@@ -384,7 +399,7 @@ def main() -> None:
             character=character,
             resolution=resolution,
             aspect_ratio=aspect,
-            prompt=args.prompt,
+            prompt=prompt,
             assume_yes=args.yes,
             concurrency=max(1, args.concurrency),
         ))
