@@ -315,13 +315,15 @@ async def _run_pipeline(
             for chunk, path in zip(speech_chunks, results):
                 speech_outputs[chunk.index] = path
 
-    # Determine canonical fps + size from the first Hedra output.
-    size = video.RESOLUTION_DIMS[resolution]
+    # Derive canonical fps + size from the first Hedra output so we match
+    # whatever Hedra actually produced, not a hardcoded table.
     if speech_chunks:
         first_out = speech_outputs[speech_chunks[0].index]
         target_fps = video.probe_fps(first_out)
+        size = video.probe_resolution(first_out)
     else:
         target_fps = 25.0
+        size = video.RESOLUTION_DIMS.get(resolution, (1280, 720))
 
     console.print(f"[dim]Rendering {len(silence_chunks)} silence segments at {target_fps:.2f} fps ...[/dim]")
     silence_outputs: dict[int, Path] = {}

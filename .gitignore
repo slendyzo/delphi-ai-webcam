@@ -30,3 +30,6 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Working files (too big for git)
+*.psd

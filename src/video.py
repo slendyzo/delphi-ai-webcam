@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 RESOLUTION_DIMS = {
+    "1080p": (1920, 1080),
     "720p": (1280, 720),
     "540p": (960, 540),
 }
